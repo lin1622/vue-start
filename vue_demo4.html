@@ -1,0 +1,114 @@
+<!-- 列表渲染 -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Document</title>
+    <script src="https://unpkg.com/vue"></script>
+</head>
+<body>
+<div id="watch-example">
+    <li v-for="n in evenNumbers">{{ n }}</li>
+    <template v-for="item in items">
+        <li>{{ item.msg }}</li>
+        <!--<li class="divider"></li>-->
+    </template>
+</div>
+<div id="todo-list-example">
+    <input
+            v-model="newTodoText"
+            v-on:keyup.enter="addNewTodo"
+            placeholder="Add a todo"
+    >
+    <ul>
+        <li
+                is="todo-item"
+                v-for="(todo, index) in todos"
+                v-bind:key="todo.id"
+                v-bind:title="todo.title"
+                v-on:remove="todos.splice(index, 1)"
+        ></li>
+    </ul>
+</div>
+</body>
+</html>
+<script>
+    Vue.component('todo-item', {
+        template: '\
+            <li>\
+              {{ title }}\
+              <button v-on:click="$emit(\'remove\')">X</button>\
+            </li>\
+          ',
+        props: ['title']
+    })
+    var vm = new Vue({
+        el:"#watch-example",
+        data :{
+            userProfile:{
+                name:'aaa'
+            },
+            numbers: [ 1, 2, 3, 4, 5 ],
+            items:[
+                {msg:"test"},
+                {msg:12},
+                {msg:13}
+            ],
+            newTodoText: '',
+            todos: [
+
+                {
+                    id: 2,
+                    title: 'Take out the trash',
+                },
+                {
+                    id: 3,
+                    title: 'Mow the lawn'
+                },
+                {
+                    id: 1,
+                    title: 'Do the dishes',
+                },
+            ],
+            nextTodoId: 4
+        },
+        computed: {
+            evenNumbers: function () {
+                return this.numbers.filter(function (number) {
+                    return number % 2 === 0
+                })
+            }
+        }
+    })
+    new Vue({
+        el: '#todo-list-example',
+        data: {
+            newTodoText: '',
+            todos: [
+                {
+                    id: 1,
+                    title: 'Do the dishes',
+                },
+                {
+                    id: 2,
+                    title: 'Take out the trash',
+                },
+                {
+                    id: 3,
+                    title: 'Mow the lawn'
+                }
+            ],
+            nextTodoId: 4
+        },
+        methods: {
+            addNewTodo: function () {
+                this.todos.push({
+                    id: this.nextTodoId++,
+                    title: this.newTodoText
+                })
+                this.newTodoText = ''
+            }
+        }
+    })
+
+</script>

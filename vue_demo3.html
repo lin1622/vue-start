@@ -1,0 +1,89 @@
+<!-- 模板语法 -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Document</title>
+	<script src="https://unpkg.com/vue"></script>
+</head>
+<body>
+	<div id="watch-example">
+		<div v-bind:class="classObject"></div>
+		<p>
+			Ask a yes/no question:
+			<input v-model="question">
+		</p>
+		<p>{{ answer }}</p>
+		<my-component class="baz boo"></my-component>
+		<div v-for="(value,key,index) in object">
+			{{ index }}.{{ key }}:{{ value }}
+		</div>
+		<div v-for="(item,key) in object " >
+			{{ item }}.{{ key }}
+		</div>
+	</div>
+</body>
+</html>
+<script src="https://cdn.jsdelivr.net/npm/axios@0.12.0/dist/axios.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/lodash@4.13.1/lodash.min.js"></script>
+<script>
+    Vue.component('my-component', {
+        template: '<p class="foo bar"><span class="tedst">aa</span></p>'
+    })
+
+    var watchExampleVM = new Vue({
+        el: '#watch-example',
+        data: {
+            question: '',
+            answer: 'I cannot give you an answer until you ask a question!',
+            classObject: {
+                active: true,
+                'text-danger': false
+            },
+            object: {
+                firstName: 'John',
+                lastName: 'Doe',
+                age: 30
+            }
+        },
+        watch: {
+            // 如果 `question` 发生改变，这个函数就会运行
+            question: function (newQuestion, oldQuestion) {
+                this.answer = 'Waiting for you to stop typing...'
+                this.getAnswer()
+				this.changeObject()
+            }
+        },
+        methods: {
+            // `_.debounce` 是一个通过 Lodash 限制操作频率的函数。
+            // 在这个例子中，我们希望限制访问 yesno.wtf/api 的频率
+            // AJAX 请求直到用户输入完毕才会发出。想要了解更多关于
+            // `_.debounce` 函数 (及其近亲 `_.throttle`) 的知识，
+            // 请参考：https://lodash.com/docs#debounce
+            getAnswer: _.debounce(
+                function () {
+                    if (this.question.indexOf('?') === -1) {
+                        this.answer = 'Questions usually contain a question mark. ;-)'
+                        return
+                    }
+                    this.answer = 'Thinking...'
+                    var vm = this
+                    axios.get('https://yesno.wtf/api')
+                        .then(function (response) {
+                            vm.answer = _.capitalize(response.data.answer)
+                        })
+                        .catch(function (error) {
+                            vm.answer = 'Error! Could not reach the API. ' + error
+                        })
+                },
+                // 这是我们为判定用户停止输入等待的毫秒数
+                500
+            ),
+			changeObject:function () {
+                var num = Math.floor(Math.random()*100)
+                this.object.firstName = 'test'+num;
+				console.log(this.object.firstName)
+            }
+        }
+    })
+</script>
